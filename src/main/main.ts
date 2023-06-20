@@ -11,9 +11,13 @@
 import path from 'path';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
+import { AlphaSync } from 'alpha_sync';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import { UPNPImage } from './Types';
+
+const as = new AlphaSync();
 
 class AppUpdater {
   constructor() {
@@ -25,10 +29,26 @@ class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
-ipcMain.on('ipc-example', async (event, arg) => {
-  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
-  event.reply('ipc-example', msgTemplate('pong'));
+const getImages = async (): Promise<Record<string, UPNPImage[]>> => {
+  await as.discover_avaliable_services();
+  await as.generate_tree();
+  return as.date_to_items;
+};
+
+const ssdp = async () => {
+  try{
+    await as.ssdp();
+  } catch (error) {
+    throw new Error('SSDP failed');
+  }
+
+};
+ipcMain.on('get-images', async (event) => {
+  // const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
+  const images: Record<string, UPNPImage[]> = await getImages();
+  // console.log(msgTemplate(arg));
+  console.log(images);
+  event.reply('recieved-images', images);
 });
 
 if (process.env.NODE_ENV === 'production') {
@@ -43,23 +63,24 @@ if (isDebug) {
   require('electron-debug')();
 }
 
-const installExtensions = async () => {
-  const installer = require('electron-devtools-installer');
-  const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
-  const extensions = ['REACT_DEVELOPER_TOOLS'];
 
-  return installer
-    .default(
-      extensions.map((name) => installer[name]),
-      forceDownload
-    )
-    .catch(console.log);
-};
+// const installExtensions = async () => {
+//   const installer = require('electron-devtools-installer');
+//   const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
+//   const extensions = ['REACT_DEVELOPER_TOOLS'];
+
+//   return installer
+//     .default(
+//       extensions.map((name) => installer[name]),
+//       forceDownload
+//     )
+//     .catch(console.log);
+// };
 
 const createWindow = async () => {
-  if (isDebug) {
-    await installExtensions();
-  }
+  // if (isDebug) {
+  //   await installExtensions();
+  // }
 
   const RESOURCES_PATH = app.isPackaged
     ? path.join(process.resourcesPath, 'assets')
