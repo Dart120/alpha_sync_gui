@@ -11,6 +11,9 @@
 import path from 'path';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
+import installExtension, {
+  REACT_DEVELOPER_TOOLS,
+} from 'electron-devtools-installer';
 import { AlphaSync } from 'alpha_sync';
 import log from 'electron-log';
 import MenuBuilder from './menu';
@@ -30,18 +33,22 @@ class AppUpdater {
 let mainWindow: BrowserWindow | null = null;
 
 const getImages = async (): Promise<Record<string, UPNPImage[]>> => {
-  await as.discover_avaliable_services();
-  await as.generate_tree();
+  try {
+    await as.discover_avaliable_services();
+    await as.generate_tree();
+  } catch (error) {
+    throw new Error('Error retrieving images');
+  }
+
   return as.date_to_items;
 };
 
 const ssdp = async () => {
-  try{
+  try {
     await as.ssdp();
   } catch (error) {
     throw new Error('SSDP failed');
   }
-
 };
 ipcMain.on('get-images', async (event) => {
   // const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
@@ -63,25 +70,14 @@ if (isDebug) {
   require('electron-debug')();
 }
 
-
-// const installExtensions = async () => {
-//   const installer = require('electron-devtools-installer');
-//   const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
-//   const extensions = ['REACT_DEVELOPER_TOOLS'];
-
-//   return installer
-//     .default(
-//       extensions.map((name) => installer[name]),
-//       forceDownload
-//     )
-//     .catch(console.log);
-// };
+// eslint-disable-next-line promise/catch-or-return
+// app.whenReady().then(() => {
+//   installExtension(REACT_DEVELOPER_TOOLS)
+//     .then((name) => console.log(`Added Extension:  ${name}`))
+//     .catch((err) => console.log('An error occurred: ', err));
+// });
 
 const createWindow = async () => {
-  // if (isDebug) {
-  //   await installExtensions();
-  // }
-
   const RESOURCES_PATH = app.isPackaged
     ? path.join(process.resourcesPath, 'assets')
     : path.join(__dirname, '../../assets');

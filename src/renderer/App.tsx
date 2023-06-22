@@ -1,41 +1,48 @@
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
-import Button from '@mui/material/Button';
-import icon from '../../assets/icon.svg';
+import { useState, useEffect } from 'react';
+import { UPNPImage } from 'main/Types';
+import DateAccordionView from './Components/DateAccordionView';
+import ResponsiveAppBar from './Components/Bar';
 import './App.css';
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
-function Hello() {
-
-  // calling IPC exposed from preload script
+export default function App() {
+  const [images, setImages] = useState({});
+  useEffect(() => {
+    window.electron.ipcRenderer.sendMessage('get-images');
+  }, []);
   window.electron.ipcRenderer.once('recieved-images', (arg) => {
     // eslint-disable-next-line no-console
-    console.log(arg);
+    if (typeof arg === 'object' && arg !== null) {
+      const record = arg as Record<string, UPNPImage[]>;
+      setImages(record);
+      // Now you can use `record` as `Record<string, UPNPImage[]>`
+    } else {
+      // Handle the case when `arg` is not the expected type.
+      throw new Error('alpha_sync output not of expected type');
+    }
   });
-  // window.electron.ipcRenderer.sendMessage('get-images');
-
-  return (
-    <div>
-      <Button
-        variant="contained"
-        onClick={() => {
-          console.log('clicked');
-          window.electron.ipcRenderer.sendMessage('get-images');
-        }}
-      >
-        Hello World
-      </Button>
-    </div>
-  );
-}
-
-export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Hello />} />
+        <Route
+          path="/"
+          element={
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+              }}
+            >
+              <ResponsiveAppBar />
+              <DateAccordionView dateImagesRecord={images} />
+            </div>
+          }
+        />
       </Routes>
     </Router>
   );
