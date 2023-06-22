@@ -1,9 +1,11 @@
 import * as React from 'react';
+
 import AppBar from '@mui/material/AppBar';
 
 import Typography from '@mui/material/Typography';
 
 import Container from '@mui/material/Container';
+import LivenessChecker from './LivenessChecker';
 
 function ResponsiveAppBar() {
   return (
@@ -17,7 +19,12 @@ function ResponsiveAppBar() {
       }}
     >
       <Container
-        sx={{ width: '100%', justifyContent: 'center', display: 'flex' }}
+        sx={{
+          width: '100%',
+          justifyContent: 'center',
+          display: 'flex',
+          alignItems: 'center',
+        }}
       >
         <Typography
           variant="h6"
@@ -36,6 +43,7 @@ function ResponsiveAppBar() {
         >
           Alpha Sync
         </Typography>
+        <LivenessChecker />
       </Container>
     </AppBar>
   );

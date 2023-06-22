@@ -9,7 +9,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import installExtension, {
   REACT_DEVELOPER_TOOLS,
@@ -54,8 +54,35 @@ ipcMain.on('get-images', async (event) => {
   // const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   const images: Record<string, UPNPImage[]> = await getImages();
   // console.log(msgTemplate(arg));
-  console.log(images);
   event.reply('recieved-images', images);
+});
+ipcMain.on('start-download', (event, url, name) => {
+  // const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
+  dialog
+    .showSaveDialog({
+      title: 'Save File',
+      defaultPath: name,
+    })
+    .then(async (result) => {
+      if (!result.canceled && result.filePath) {
+        // Trigger the file download using the main process
+        await as.download_from_url(url, result.filePath);
+      }
+    })
+    .catch((error) => {
+      console.error('Error showing Save dialog:', error);
+    });
+});
+ipcMain.on('get-liveness', (event) => {
+  // const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
+  const url = as.cameraUrl;
+  fetch(`${url}/dd.xml`)
+    .then((resp) => {
+      event.reply('recieved-liveness', resp.status === 200);
+    })
+    .catch(() => {
+      event.reply('recieved-liveness', false);
+    });
 });
 
 if (process.env.NODE_ENV === 'production') {
