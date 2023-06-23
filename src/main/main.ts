@@ -18,7 +18,7 @@ import { AlphaSync } from 'alpha_sync';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
-import { UPNPImage } from './Types';
+import { UPNPImage, DisplayUPNPImage } from './Types';
 
 const as = new AlphaSync();
 
@@ -53,20 +53,27 @@ const ssdp = async () => {
 ipcMain.on('get-images', async (event) => {
   // const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   const images: Record<string, UPNPImage[]> = await getImages();
-  // console.log(msgTemplate(arg));
   event.reply('recieved-images', images);
 });
-ipcMain.on('start-download', (event, url, name) => {
+ipcMain.on('start-download', (event, image: UPNPImage) => {
   // const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
+  mainWindow?.webContents.send('trigger');
   dialog
     .showSaveDialog({
       title: 'Save File',
-      defaultPath: name,
+      defaultPath: image['dc:title'],
     })
     .then(async (result) => {
       if (!result.canceled && result.filePath) {
         // Trigger the file download using the main process
-        await as.download_from_url(url, result.filePath);
+        try {
+          await as.download_from_url(image.ORG, result.filePath);
+
+          console.log('just finshed should send msg');
+          event.reply('task-finished', true);
+        } catch (error) {
+          event.reply('task-finished', false);
+        }
       }
     })
     .catch((error) => {
@@ -84,6 +91,50 @@ ipcMain.on('get-liveness', (event) => {
       event.reply('recieved-liveness', false);
     });
 });
+// Below returns empty objects
+ipcMain.on(
+  'download-checked-images',
+  (event, record: Record<string, DisplayUPNPImage[]>) => {
+    // const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
+    mainWindow?.webContents.send('trigger');
+    console.log(record);
+    let displayDateImagesRecord = Object.fromEntries(
+      Object.entries(record).map(([key, value]) => {
+        const newValue = value.filter((image) => image.checked);
+        return [key, newValue];
+      })
+    );
+    console.log(displayDateImagesRecord);
+    displayDateImagesRecord = Object.fromEntries(
+      Object.entries(displayDateImagesRecord).filter(
+        ([key, value]) => value.length
+      )
+    );
+    console.log(displayDateImagesRecord);
+    dialog
+      .showSaveDialog({
+        title: 'Save File',
+        defaultPath: './images',
+      })
+      .then(async (result) => {
+        if (!result.canceled && result.filePath) {
+          // Trigger the file download using the main process
+          try {
+            await as.get_all_images_from_dict(
+              result.filePath,
+              displayDateImagesRecord
+            );
+            event.reply('task-finished', true);
+          } catch (error) {
+            event.reply('task-finished', false);
+          }
+        }
+      })
+      .catch((error) => {
+        console.error('Error showing Save dialog:', error);
+      });
+  }
+);
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -109,9 +160,8 @@ const createWindow = async () => {
     ? path.join(process.resourcesPath, 'assets')
     : path.join(__dirname, '../../assets');
 
-  const getAssetPath = (...paths: string[]): string => {
-    return path.join(RESOURCES_PATH, ...paths);
-  };
+  const getAssetPath = (...paths: string[]): string =>
+    path.join(RESOURCES_PATH, ...paths);
 
   mainWindow = new BrowserWindow({
     show: false,

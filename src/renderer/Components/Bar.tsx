@@ -1,16 +1,20 @@
 import * as React from 'react';
 
 import AppBar from '@mui/material/AppBar';
-
 import Typography from '@mui/material/Typography';
-
+import { IconButton, Stack } from '@mui/material';
 import Container from '@mui/material/Container';
+import Download from '@mui/icons-material/Download';
+import DownloadManagerView from './DownloadManagerView';
 import LivenessChecker from './LivenessChecker';
 
-function ResponsiveAppBar() {
+type ResponsiveAppBarProps = {
+  downloadFunction: () => void; // Define the type of the prop
+};
+function ResponsiveAppBar({ downloadFunction }: ResponsiveAppBarProps) {
   return (
     <AppBar
-      position="static"
+      position="fixed"
       sx={{
         width: '100%',
         justifyContent: 'center',
@@ -21,7 +25,7 @@ function ResponsiveAppBar() {
       <Container
         sx={{
           width: '100%',
-          justifyContent: 'center',
+          justifyContent: 'space-between',
           display: 'flex',
           alignItems: 'center',
         }}
@@ -43,7 +47,17 @@ function ResponsiveAppBar() {
         >
           Alpha Sync
         </Typography>
+        <Stack direction='row' alignItems='center' width='30%' justifyContent='space-between'>
+        <IconButton
+          sx={{ color: 'rgba(255, 255, 255)' }}
+          aria-label="Download Checked"
+          onClick={downloadFunction}
+        >
+          <Download sx={{ marginLeft: 'auto' }} />
+        </IconButton>
         <LivenessChecker />
+        <DownloadManagerView />
+        </Stack>
       </Container>
     </AppBar>
   );

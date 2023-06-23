@@ -4,11 +4,12 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { UPNPImage } from 'main/Types';
-import ImageView from './ImageView';
+import { UPNPImage, DisplayUPNPImage } from 'main/Types';
+import { CheckBox } from '@mui/icons-material';
+import ImagesView from './ImagesView';
 
 type DateAccordionProps = {
-  dateImagesRecord: Record<string, UPNPImage[]>;
+  dateImagesRecord: Record<string, DisplayUPNPImage[]>;
 };
 
 const DateAccordion: FC<DateAccordionProps> = ({ dateImagesRecord }) => {
@@ -22,7 +23,7 @@ const DateAccordion: FC<DateAccordionProps> = ({ dateImagesRecord }) => {
         <Typography>{key}</Typography>
       </AccordionSummary>
       <AccordionDetails>
-        <ImageView images={value} />
+        <ImagesView images={value} />
       </AccordionDetails>
     </Accordion>
   ));
