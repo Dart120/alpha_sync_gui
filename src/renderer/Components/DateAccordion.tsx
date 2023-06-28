@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import * as React from 'react';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -10,9 +11,17 @@ import ImagesView from './ImagesView';
 
 type DateAccordionProps = {
   dateImagesRecord: Record<string, DisplayUPNPImage[]>;
+  setImages: React.Dispatch<React.SetStateAction<{}>>;
 };
 
-const DateAccordion: FC<DateAccordionProps> = ({ dateImagesRecord }) => {
+const DateAccordion: FC<DateAccordionProps> = ({ dateImagesRecord, setImages }) => {
+  const setImagesFull = (key: string, idx: number, val: boolean) => {
+    setImages((images: Record<string, DisplayUPNPImage[]>) => {
+      // eslint-disable-next-line no-param-reassign
+      images[key][idx].checked = val;
+      return { ...images, key: images[key] };
+    });
+  };
   const listItems = Object.entries(dateImagesRecord).map(([key, value]) => (
     <Accordion key={key} sx={{ width: '100%' }}>
       <AccordionSummary
@@ -23,7 +32,7 @@ const DateAccordion: FC<DateAccordionProps> = ({ dateImagesRecord }) => {
         <Typography>{key}</Typography>
       </AccordionSummary>
       <AccordionDetails>
-        <ImagesView images={value} />
+        <ImagesView images={value} setImages={setImagesFull} date={key} />
       </AccordionDetails>
     </Accordion>
   ));

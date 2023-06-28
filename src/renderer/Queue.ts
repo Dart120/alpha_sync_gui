@@ -1,10 +1,10 @@
 /* eslint-disable no-plusplus */
 export default class Queue<T> {
-  public constructor(
-    private elements: Record<number, T> = {},
-    private head: number = 0,
-    private tail: number = 0
-  ) {}
+  private elements: Record<number, T> = {};
+
+  private head = 0;
+
+  private tail = 0;
 
   public enqueue(element: T): void {
     this.elements[this.tail] = element;

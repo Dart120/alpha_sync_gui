@@ -4,18 +4,24 @@ import { useEffect, useState } from 'react';
 function LivenessChecker() {
   const [status, setStatus] = useState(false);
   useEffect(() => {
+    window.electron.ipcRenderer.on('recieved-liveness', (arg) => {
+      // eslint-disable-next-line no-console
+      console.log(`recieved ${arg}`);
+      setStatus(arg as boolean);
+    });
+    window.electron.ipcRenderer.sendMessage('get-liveness');
+    console.log('sent');
     const int = setInterval(() => {
       window.electron.ipcRenderer.sendMessage('get-liveness');
+      console.log('sent');
     }, 5000);
 
     return () => {
+      window.electron.ipcRenderer.removeEventListener('recieved-liveness');
       clearInterval(int);
     };
   }, []);
-  window.electron.ipcRenderer.once('recieved-liveness', (arg) => {
-    // eslint-disable-next-line no-console
-    setStatus(arg as boolean);
-  });
+
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

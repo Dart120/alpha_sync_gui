@@ -20,6 +20,9 @@ export interface Job {
   message: Channels;
   item:
     | UPNPImage
-    | Record<string, DisplayUPNPImage[]>
-    | Record<string, UPNPImage[]>;
+    | Record<string, DisplayUPNPImage[]>;
+}
+
+export interface ReadyJob extends Job {
+  filePath: string;
 }

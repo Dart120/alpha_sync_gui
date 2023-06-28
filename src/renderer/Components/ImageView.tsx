@@ -1,4 +1,7 @@
-import { ChangeEvent, FC, useState, useEffect, useContext } from 'react';
+import {
+  ChangeEvent, FC, useState, useEffect, useContext,
+} from 'react';
+import * as React from 'react';
 import { ImageListItem, ImageListItemBar, IconButton } from '@mui/material';
 import Download from '@mui/icons-material/Download';
 import Skeleton from '@mui/material/Skeleton';
@@ -8,26 +11,31 @@ import { DownloadManagerContext } from 'renderer/App';
 
 type ImageViewProps = {
   item: DisplayUPNPImage;
-  globalChecked: boolean;
+  idx:number;
+  setImages: (key:string, idx: number, val: boolean) => void;
+  checkIfAllTicked: () => void;
+  date:string;
 };
 
-const ImageView: FC<ImageViewProps> = ({ item, globalChecked }) => {
+const ImageView: FC<ImageViewProps> = ({
+  item, date, setImages, idx, checkIfAllTicked,
+}) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
-
   const downloadManager = useContext(DownloadManagerContext);
   const handleCheck = (event: ChangeEvent<HTMLInputElement>) => {
-    item.checked = event.target.checked;
+    setImages(date, idx, event.target.checked);
     setIsChecked(event.target.checked);
   };
   useEffect(() => {
-    setIsChecked(globalChecked);
-  }, [globalChecked]);
+    setIsChecked(item.checked);
+    checkIfAllTicked();
+  }, [item.checked]);
   return (
     <ImageListItem key={item['dc:title']}>
       <img
         style={{ objectFit: 'contain', width: '100%', height: 164 }}
-        src={item.SM}
+        src={item.TN}
         alt={isLoaded ? '' : item['dc:title']}
         loading="lazy"
         onLoad={() => setIsLoaded(true)}
@@ -36,7 +44,7 @@ const ImageView: FC<ImageViewProps> = ({ item, globalChecked }) => {
         <Skeleton variant="rectangular" width="100%" height={250} />
       )}
       <ImageListItemBar
-        actionIcon={
+        actionIcon={(
           <IconButton
             sx={{ color: 'rgba(255, 255, 255)' }}
             aria-label="Download"
@@ -46,18 +54,17 @@ const ImageView: FC<ImageViewProps> = ({ item, globalChecked }) => {
           >
             <Download />
           </IconButton>
-        }
+        )}
       />
-
       <ImageListItemBar
         sx={{
           background:
-            'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, ' +
-            'rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
+            'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, '
+            + 'rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
         }}
         title={item['dc:title']}
         position="top"
-        actionIcon={
+        actionIcon={(
           <IconButton
             sx={{ color: 'purple' }}
             aria-label={`checkbox ${item['dc:title']}`}
@@ -67,7 +74,7 @@ const ImageView: FC<ImageViewProps> = ({ item, globalChecked }) => {
               onChange={(event) => handleCheck(event)}
             />
           </IconButton>
-        }
+        )}
         actionPosition="left"
       />
     </ImageListItem>

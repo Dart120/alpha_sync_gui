@@ -9,16 +9,18 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
+import {
+  app, BrowserWindow, shell, ipcMain, dialog,
+} from 'electron';
 import { autoUpdater } from 'electron-updater';
-import installExtension, {
-  REACT_DEVELOPER_TOOLS,
-} from 'electron-devtools-installer';
+import { installExtension, REACT_DEVELOPER_TOOLS } from 'electron-extension-installer';
 import { AlphaSync } from 'alpha_sync';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
-import { UPNPImage, DisplayUPNPImage } from './Types';
+import {
+  UPNPImage, DisplayUPNPImage, Job, ReadyJob,
+} from './Types';
 
 const as = new AlphaSync();
 
@@ -55,30 +57,54 @@ ipcMain.on('get-images', async (event) => {
   const images: Record<string, UPNPImage[]> = await getImages();
   event.reply('recieved-images', images);
 });
-ipcMain.on('start-download', (event, image: UPNPImage) => {
+function isImage(item: UPNPImage | Record<string, UPNPImage[]>): item is UPNPImage {
+  return (<UPNPImage>item)['dc:title'] !== undefined;
+}
+ipcMain.on('start-download', async (event, job: ReadyJob) => {
   // const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  mainWindow?.webContents.send('trigger');
-  dialog
-    .showSaveDialog({
-      title: 'Save File',
-      defaultPath: image['dc:title'],
-    })
-    .then(async (result) => {
-      if (!result.canceled && result.filePath) {
-        // Trigger the file download using the main process
-        try {
-          await as.download_from_url(image.ORG, result.filePath);
 
-          console.log('just finshed should send msg');
-          event.reply('task-finished', true);
-        } catch (error) {
-          event.reply('task-finished', false);
+  // Trigger the file download using the main process
+  try {
+    if (isImage(job.item)) {
+      await as.download_from_url(job.item.ORG, job.filePath);
+    } else {
+      throw new Error('Tried to download an array as a single image');
+    }
+
+    console.log('just finshed should send msg');
+    event.reply('task-finished-class', true);
+  } catch (error) {
+    console.error(error);
+    event.reply('task-finished-class', false);
+  }
+});
+
+ipcMain.on('show-save-dialog', (event, job: Job) => {
+  if (job.message === 'start-download' && isImage(job.item)) {
+    dialog
+      .showSaveDialog({
+        title: 'Save File',
+        defaultPath: job.item['dc:title'],
+      }).then((result) => {
+        if (!result.canceled && result.filePath) {
+        // Trigger the file download using the main process
+          const readyJob: ReadyJob = { ...job, filePath: result.filePath };
+          event.reply('got-file-path', readyJob);
         }
-      }
-    })
-    .catch((error) => {
-      console.error('Error showing Save dialog:', error);
-    });
+      });
+  } else if (job.message === 'download-checked-images') {
+    dialog
+      .showSaveDialog({
+        title: 'Save File',
+        defaultPath: './images',
+      }).then((result) => {
+        if (!result.canceled && result.filePath) {
+        // Trigger the file download using the main process
+          const readyJob: ReadyJob = { ...job, filePath: result.filePath };
+          event.reply('got-file-path', readyJob);
+        }
+      });
+  }
 });
 ipcMain.on('get-liveness', (event) => {
   // const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
@@ -94,46 +120,38 @@ ipcMain.on('get-liveness', (event) => {
 // Below returns empty objects
 ipcMain.on(
   'download-checked-images',
-  (event, record: Record<string, DisplayUPNPImage[]>) => {
+  async (event, job: ReadyJob) => {
     // const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
     mainWindow?.webContents.send('trigger');
-    console.log(record);
-    let displayDateImagesRecord = Object.fromEntries(
-      Object.entries(record).map(([key, value]) => {
-        const newValue = value.filter((image) => image.checked);
-        return [key, newValue];
-      })
-    );
-    console.log(displayDateImagesRecord);
-    displayDateImagesRecord = Object.fromEntries(
-      Object.entries(displayDateImagesRecord).filter(
-        ([key, value]) => value.length
-      )
-    );
-    console.log(displayDateImagesRecord);
-    dialog
-      .showSaveDialog({
-        title: 'Save File',
-        defaultPath: './images',
-      })
-      .then(async (result) => {
-        if (!result.canceled && result.filePath) {
-          // Trigger the file download using the main process
-          try {
-            await as.get_all_images_from_dict(
-              result.filePath,
-              displayDateImagesRecord
-            );
-            event.reply('task-finished', true);
-          } catch (error) {
-            event.reply('task-finished', false);
-          }
-        }
-      })
-      .catch((error) => {
-        console.error('Error showing Save dialog:', error);
-      });
-  }
+    // console.log(record);
+    if (!isImage(job.item)) {
+      let displayDateImagesRecord = Object.fromEntries(
+        Object.entries(job.item).map(([key, value]) => {
+          const newValue = value.filter((image) => image.checked);
+          return [key, newValue];
+        }),
+      );
+      // console.log(displayDateImagesRecord);
+      displayDateImagesRecord = Object.fromEntries(
+        Object.entries(displayDateImagesRecord).filter(
+          ([key, value]) => value.length,
+        ),
+      );
+      try {
+        await as.get_all_images_from_dict(
+          job.filePath,
+          displayDateImagesRecord,
+        );
+        event.reply('task-finished', true);
+      } catch (error) {
+        event.reply('task-finished', false);
+      }
+    }
+
+    // console.log(displayDateImagesRecord);
+
+    // Trigger the file download using the main process
+  },
 );
 
 if (process.env.NODE_ENV === 'production') {
@@ -141,8 +159,7 @@ if (process.env.NODE_ENV === 'production') {
   sourceMapSupport.install();
 }
 
-const isDebug =
-  process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
+const isDebug = process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
 if (isDebug) {
   require('electron-debug')();
@@ -160,8 +177,7 @@ const createWindow = async () => {
     ? path.join(process.resourcesPath, 'assets')
     : path.join(__dirname, '../../assets');
 
-  const getAssetPath = (...paths: string[]): string =>
-    path.join(RESOURCES_PATH, ...paths);
+  const getAssetPath = (...paths: string[]): string => path.join(RESOURCES_PATH, ...paths);
 
   mainWindow = new BrowserWindow({
     show: false,
@@ -220,8 +236,13 @@ app.on('window-all-closed', () => {
 
 app
   .whenReady()
-  .then(() => {
+  .then(async () => {
     createWindow();
+    await installExtension(REACT_DEVELOPER_TOOLS, {
+      loadExtensionOptions: {
+        allowFileAccess: true,
+      },
+    });
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
@@ -229,3 +250,10 @@ app
     });
   })
   .catch(console.log);
+
+// TODO seperate dialog from download rewuest
+// TODO fix pending indicator
+// TODO Formatting
+// TODO instructions
+// TODO packaging
+// TODO refresh and reconnect
