@@ -27,7 +27,9 @@ export default class DownloadManager {
     window.electron.ipcRenderer.on('got-file-path', (readyJob) => {
       if (isReadyJob(readyJob)) {
         const wasEmpty: boolean = this.jobQueue.isEmpty;
+        console.log(`b4 adding job ${this.jobQueue.length.toString()}`);
         this.jobQueue.enqueue(readyJob);
+        console.log(`after adding job ${this.jobQueue.length.toString()}`);
         if (wasEmpty) {
           this.execute(this.jobQueue.peek());
         }
@@ -35,11 +37,12 @@ export default class DownloadManager {
     });
   }
 
+  // eslint-disable-next-line class-methods-use-this
   add(job: Job): void {
-    console.log(`adding job ${this.jobQueue.length.toString()}`);
     window.electron.ipcRenderer.sendMessage('show-save-dialog', job);
   }
 
+  // eslint-disable-next-line class-methods-use-this
   execute(job: ReadyJob): void {
     console.log(`exe ${job.message}`);
     window.electron.ipcRenderer.sendMessage(job.message, job);

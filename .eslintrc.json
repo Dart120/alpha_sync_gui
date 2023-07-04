@@ -21,7 +21,7 @@
   "rules": {
     "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx", ".ts", ".tsx"] }],
     "react/jsx-one-expression-per-line": "off",
-    "@typescript-eslint/no-unused-vars": ["warn"],
+    "react/react-in-jsx-scope": "off",
     "no-unused-vars": "off",
     "import/no-unresolved": "off",
     "import/extensions": "off",
@@ -30,7 +30,8 @@
     "react/prop-types": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "react/jsx-props-no-spreading": "off",
-    "react/function-component-definition": ["off"]
+    "react/function-component-definition": ["off"],
+    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }]
   },
   "settings": {
     "react": {

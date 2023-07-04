@@ -2,9 +2,10 @@ import * as React from 'react';
 import { useState } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Typography from '@mui/material/Typography';
-import { IconButton, Stack } from '@mui/material';
+import { Stack, Button } from '@mui/material';
 import Container from '@mui/material/Container';
-import Download from '@mui/icons-material/Download';
+import DownloadIcon from '@mui/icons-material/Download';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { DisplayUPNPImage } from 'main/Types';
 import Checkbox from '@mui/material/Checkbox';
 import DownloadManagerView from './DownloadManagerView';
@@ -12,10 +13,17 @@ import LivenessChecker from './LivenessChecker';
 
 type ResponsiveAppBarProps = {
   downloadFunction: () => void; // Define the type of the prop
-  setImages: React.Dispatch<React.SetStateAction<{}>>;
+  refreshFunction: () => void; // Define the type of the prop
+  setImages: React.Dispatch<React.SetStateAction<object>>;
 };
-function ResponsiveAppBar({ downloadFunction, setImages }: ResponsiveAppBarProps) {
+function ResponsiveAppBar({ downloadFunction, setImages, refreshFunction }: ResponsiveAppBarProps) {
   const [checked, setChecked] = useState(false);
+  const [refreshCanBeClicked, setRefreshCanBeClicked] = useState(true);
+  const handleRefresh = () => {
+    refreshFunction();
+    setRefreshCanBeClicked(false);
+    setTimeout(() => setRefreshCanBeClicked(true), 5000);
+  };
   const handleCheck = (event: React.ChangeEvent<HTMLInputElement>) => {
     setChecked(event.target.checked);
     console.log('handling check');
@@ -41,9 +49,10 @@ function ResponsiveAppBar({ downloadFunction, setImages }: ResponsiveAppBarProps
       <Container
         sx={{
           width: '100%',
-          justifyContent: 'space-between',
+          justifyContent: 'space-evenly',
           display: 'flex',
           alignItems: 'center',
+          minWidth: '20em',
         }}
       >
         <Typography
@@ -55,7 +64,6 @@ function ResponsiveAppBar({ downloadFunction, setImages }: ResponsiveAppBarProps
             marginTop: '1em',
             marginBottom: '1em',
             display: 'block',
-            fontFamily: 'monospace',
             color: 'inherit',
             textDecoration: 'none',
             alignItems: 'center',
@@ -63,27 +71,32 @@ function ResponsiveAppBar({ downloadFunction, setImages }: ResponsiveAppBarProps
         >
           Alpha Sync
         </Typography>
-        <Checkbox
-          onChange={(event) => handleCheck(event)}
-          checked={checked}
-          color="success"
-        />
+        {/* <div style={{ display:'flex', flexDirection:'row', alignItems:'center' }}>
+
+        </div> */}
+
         <Stack
           direction="row"
           alignItems="center"
-          width="30%"
-          justifyContent="space-between"
         >
-          <IconButton
-            sx={{ color: 'rgba(255, 255, 255)' }}
-            aria-label="Download Checked"
-            onClick={downloadFunction}
-          >
-            <Download sx={{ marginLeft: 'auto' }} />
-          </IconButton>
-          <LivenessChecker />
-          <DownloadManagerView />
+          <Typography> Select all</Typography>
+          <Checkbox
+            onChange={(event) => handleCheck(event)}
+            checked={checked}
+            color="success"
+          />
         </Stack>
+        <Button size="small" onClick={downloadFunction} color="success" variant="contained" startIcon={<DownloadIcon />}>Download</Button>
+        <Button disabled={!refreshCanBeClicked} size="small" onClick={handleRefresh} color="success" variant="contained" startIcon={<RefreshIcon />}>Refresh/Reconnect</Button>
+        <Stack
+          direction="row"
+          alignItems="center"
+        >
+          <Typography>Connected:</Typography>
+          <LivenessChecker />
+        </Stack>
+        <DownloadManagerView />
+
       </Container>
     </AppBar>
   );

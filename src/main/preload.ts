@@ -3,12 +3,13 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 // import * as Electron from 'electron';
 export type Channels =
-  | 'trigger'
+  | 'length-likely-changed'
   | 'get-images'
   | 'recieved-images'
+  | 'recieved-images-failed'
   | 'get-liveness'
   | 'recieved-liveness'
-  | 'start-download'
+  | 'refresh-started'
   | 'download-checked-images'
   | 'task-finished'
   | 'task-finished-class'

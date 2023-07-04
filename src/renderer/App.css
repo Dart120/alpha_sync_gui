@@ -5,13 +5,14 @@
 
 body {
   /* position: relative; */
+  min-width: 800px;
   color: white;
   /* height: 100vh; */
   background: linear-gradient(
     200.96deg,
-    #fedc2a -29.09%,
-    #dd5789 51.77%,
-    #7a2c9e 129.35%
+    #538dcb -29.09%,
+    #795cd7 129.35%,
+    #60b17e 51.77%,
   );
   font-family: sans-serif;
   background-attachment: fixed;

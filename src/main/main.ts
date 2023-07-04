@@ -1,4 +1,6 @@
-/* eslint global-require: off, no-console: off, promise/always-return: off */
+/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint global-require: off, no-console: off */
 
 /**
  * This module executes inside of electron's main process. You can start
@@ -19,7 +21,7 @@ import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import {
-  UPNPImage, DisplayUPNPImage, Job, ReadyJob,
+  UPNPImage, Job, ReadyJob,
 } from './Types';
 
 const as = new AlphaSync();
@@ -54,57 +56,30 @@ const ssdp = async () => {
 };
 ipcMain.on('get-images', async (event) => {
   // const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  const images: Record<string, UPNPImage[]> = await getImages();
-  event.reply('recieved-images', images);
+  try {
+    event.reply('refresh-started');
+    const images: Record<string, UPNPImage[]> = await getImages();
+    event.reply('recieved-images', images);
+  } catch (error) {
+    event.reply('recieved-images', false);
+  }
 });
 function isImage(item: UPNPImage | Record<string, UPNPImage[]>): item is UPNPImage {
   return (<UPNPImage>item)['dc:title'] !== undefined;
 }
-ipcMain.on('start-download', async (event, job: ReadyJob) => {
-  // const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-
-  // Trigger the file download using the main process
-  try {
-    if (isImage(job.item)) {
-      await as.download_from_url(job.item.ORG, job.filePath);
-    } else {
-      throw new Error('Tried to download an array as a single image');
-    }
-
-    console.log('just finshed should send msg');
-    event.reply('task-finished-class', true);
-  } catch (error) {
-    console.error(error);
-    event.reply('task-finished-class', false);
-  }
-});
-
 ipcMain.on('show-save-dialog', (event, job: Job) => {
-  if (job.message === 'start-download' && isImage(job.item)) {
-    dialog
-      .showSaveDialog({
-        title: 'Save File',
-        defaultPath: job.item['dc:title'],
-      }).then((result) => {
-        if (!result.canceled && result.filePath) {
-        // Trigger the file download using the main process
-          const readyJob: ReadyJob = { ...job, filePath: result.filePath };
-          event.reply('got-file-path', readyJob);
-        }
-      });
-  } else if (job.message === 'download-checked-images') {
-    dialog
-      .showSaveDialog({
-        title: 'Save File',
-        defaultPath: './images',
-      }).then((result) => {
-        if (!result.canceled && result.filePath) {
-        // Trigger the file download using the main process
-          const readyJob: ReadyJob = { ...job, filePath: result.filePath };
-          event.reply('got-file-path', readyJob);
-        }
-      });
-  }
+  dialog
+    .showSaveDialog({
+      title: 'Save File',
+      defaultPath: './images',
+    }).then((result) => {
+      if (!result.canceled && result.filePath) {
+      // Trigger the file download using the main process
+        const readyJob: ReadyJob = { ...job, filePath: result.filePath };
+        event.reply('got-file-path', readyJob);
+        event.reply('length-likely-changed');
+      }
+    });
 });
 ipcMain.on('get-liveness', (event) => {
   // const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
@@ -134,16 +109,21 @@ ipcMain.on(
       // console.log(displayDateImagesRecord);
       displayDateImagesRecord = Object.fromEntries(
         Object.entries(displayDateImagesRecord).filter(
-          ([key, value]) => value.length,
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          ([_, value]) => value.length,
         ),
       );
       try {
+        console.log('about to download');
         await as.get_all_images_from_dict(
           job.filePath,
           displayDateImagesRecord,
         );
+
+        event.reply('task-finished-class', true);
         event.reply('task-finished', true);
       } catch (error) {
+        event.reply('task-finished-class', false);
         event.reply('task-finished', false);
       }
     }
@@ -165,7 +145,6 @@ if (isDebug) {
   require('electron-debug')();
 }
 
-// eslint-disable-next-line promise/catch-or-return
 // app.whenReady().then(() => {
 //   installExtension(REACT_DEVELOPER_TOOLS)
 //     .then((name) => console.log(`Added Extension:  ${name}`))
@@ -183,6 +162,8 @@ const createWindow = async () => {
     show: false,
     width: 1024,
     height: 728,
+    minWidth: 800,
+    minHeight: 500,
     icon: getAssetPath('icon.png'),
     webPreferences: {
       preload: app.isPackaged
@@ -250,10 +231,5 @@ app
     });
   })
   .catch(console.log);
-
-// TODO seperate dialog from download rewuest
-// TODO fix pending indicator
-// TODO Formatting
 // TODO instructions
-// TODO packaging
-// TODO refresh and reconnect
+// TODO packaging icon remove electron

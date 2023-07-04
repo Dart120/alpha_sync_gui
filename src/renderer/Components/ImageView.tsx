@@ -1,13 +1,10 @@
 import {
-  ChangeEvent, FC, useState, useEffect, useContext,
+  ChangeEvent, FC, useState, useEffect,
 } from 'react';
-import * as React from 'react';
 import { ImageListItem, ImageListItemBar, IconButton } from '@mui/material';
-import Download from '@mui/icons-material/Download';
 import Skeleton from '@mui/material/Skeleton';
 import Checkbox from '@mui/material/Checkbox';
 import { DisplayUPNPImage } from 'main/Types';
-import { DownloadManagerContext } from 'renderer/App';
 
 type ImageViewProps = {
   item: DisplayUPNPImage;
@@ -22,7 +19,6 @@ const ImageView: FC<ImageViewProps> = ({
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
-  const downloadManager = useContext(DownloadManagerContext);
   const handleCheck = (event: ChangeEvent<HTMLInputElement>) => {
     setImages(date, idx, event.target.checked);
     setIsChecked(event.target.checked);
@@ -43,19 +39,6 @@ const ImageView: FC<ImageViewProps> = ({
       {!isLoaded && (
         <Skeleton variant="rectangular" width="100%" height={250} />
       )}
-      <ImageListItemBar
-        actionIcon={(
-          <IconButton
-            sx={{ color: 'rgba(255, 255, 255)' }}
-            aria-label="Download"
-            onClick={() => {
-              downloadManager.add({ message: 'start-download', item });
-            }}
-          >
-            <Download />
-          </IconButton>
-        )}
-      />
       <ImageListItemBar
         sx={{
           background:

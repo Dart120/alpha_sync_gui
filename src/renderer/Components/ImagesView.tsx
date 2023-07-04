@@ -1,5 +1,5 @@
 import {
-  ChangeEvent, FC, useState, useEffect,
+  ChangeEvent, FC, useState,
 } from 'react';
 import { ImageList, Typography } from '@mui/material';
 import { DisplayUPNPImage } from 'main/Types';
@@ -16,16 +16,15 @@ type ImagesViewProps = {
 
 const ImagesView: FC<ImagesViewProps> = ({ images, date, setImages }) => {
   const [isChecked, setIsChecked] = useState(false);
-
   const handleCheck = (event: ChangeEvent<HTMLInputElement>) => {
     setIsChecked(event.target.checked);
+
     images.forEach((val, idx) => {
       setImages(date, idx, event.target.checked);
     });
   };
   const checkIfAllTicked = () => {
-    const res = images.reduce((tempIsAllChecked, image) => (image.checked && tempIsAllChecked), true);
-    console.log(res);
+    const res = images.reduce((isAllChecked, image) => (image.checked && isAllChecked), true);
     setIsChecked(res);
   };
 

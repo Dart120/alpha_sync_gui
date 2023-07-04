@@ -5,7 +5,7 @@ export interface UPNPImage {
   'dc:title': string;
   '@_id': string;
   'dc:date'?: string;
-  res: any[];
+  res: unknown[];
   ORG: string;
   LRG: string;
   TN: string;

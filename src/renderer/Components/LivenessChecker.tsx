@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useEffect, useState } from 'react';
 
 function LivenessChecker() {
@@ -27,7 +26,7 @@ function LivenessChecker() {
       xmlns="http://www.w3.org/2000/svg"
       width="20"
       height="20"
-      // style={{ marginLeft: 'auto' }}
+      style={{ margin: '1em' }}
     >
       <circle cx="10" cy="10" r="5" fill={status ? 'green' : 'red'} />
     </svg>

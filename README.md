@@ -16,12 +16,7 @@ npm run package
 
 ## Roadmap
 
-- Can download image from date
+- Download only missing images
 
-- Can multiselect and download
 
-- Information page and initial search button
-
-- Refresh Button
-
-- Re Connect Button
+<a href="https://www.flaticon.com/free-icons/photograph" title="photograph icons">Photograph icons created by kank - Flaticon</a>
