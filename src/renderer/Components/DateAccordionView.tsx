@@ -29,6 +29,15 @@ const DateAccordionView: FC<DateAccordionProps> = ({ dateImagesRecord, setImages
       window.electron.ipcRenderer.removeEventListener('recieved-images');
     };
   }, []);
+  const viewChoice = (): React.JSX.Element => {
+    if (!refreshing) {
+      if (refreshWasSucessful) {
+        return (<DateAccordion dateImagesRecord={dateImagesRecord} setImages={setImages} />);
+      }
+      return (<Instructions />);
+    }
+    return (<CircularProgress sx={{ margin: '5em' }} />);
+  };
   return (
     <div
       style={{
@@ -39,13 +48,7 @@ const DateAccordionView: FC<DateAccordionProps> = ({ dateImagesRecord, setImages
         textAlign: 'center',
       }}
     >
-      {(!refreshing) ? (
-
-        (refreshWasSucessful) ?
-        (<DateAccordion dateImagesRecord={dateImagesRecord} setImages={setImages} />) : (<Instructions />)
-      ) : (
-        <CircularProgress sx={{ margin: '5em' }} />
-      )}
+      {viewChoice()}
     </div>
   );
 };
