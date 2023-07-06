@@ -3,7 +3,7 @@ name: prerelease
 on:
   push:
     tags:
-      - '*'
+      - 'p*'
 
 jobs:
   build:
