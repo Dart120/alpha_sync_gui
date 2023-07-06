@@ -35,4 +35,4 @@ jobs:
         files: release/app/*
         prerelease: true
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.PRERELEASE_TOKEN }}
