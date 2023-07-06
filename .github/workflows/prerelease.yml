@@ -27,7 +27,7 @@ jobs:
 
     - name: Build and Release
       run: |
-        npm run build
+        npm run package
 
     - name: Release
       uses: softprops/action-gh-release@v1
