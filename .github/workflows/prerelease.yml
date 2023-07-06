@@ -1,9 +1,9 @@
-name: Electron Build and Release
+name: prerelease
 
 on:
   push:
     tags:
-      - 'v*'
+      - '*'
 
 jobs:
   build:
