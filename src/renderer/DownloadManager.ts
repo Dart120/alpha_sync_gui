@@ -10,7 +10,7 @@ export default class DownloadManager {
 
   constructor() {
     console.log('created');
-    window.electron.ipcRenderer.on('task-finished-class', (result) => {
+    window.electron.ipcRenderer.on('task-finished', (result) => {
       console.log('detected done');
       if (result) {
         console.log('removed job');
@@ -21,7 +21,7 @@ export default class DownloadManager {
         }
       } else {
         console.log('failure starting over');
-        this.jobQueue = new Queue<ReadyJob>();
+        this.clear();
       }
     });
     window.electron.ipcRenderer.on('got-file-path', (readyJob) => {
@@ -35,11 +35,19 @@ export default class DownloadManager {
         }
       }
     });
+    // window.electron.ipcRenderer.on('cancelled', () => {
+    //   console.info('queue cleared');
+    //   this.clear();
+    // });
   }
 
   // eslint-disable-next-line class-methods-use-this
   add(job: Job): void {
     window.electron.ipcRenderer.sendMessage('show-save-dialog', job);
+  }
+
+  clear(): void {
+    this.jobQueue = new Queue<ReadyJob>();
   }
 
   // eslint-disable-next-line class-methods-use-this

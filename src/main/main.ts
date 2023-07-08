@@ -92,6 +92,12 @@ ipcMain.on('get-liveness', (event) => {
       event.reply('recieved-liveness', false);
     });
 });
+
+ipcMain.on('cancel-all-jobs', (event) => {
+  console.info('cancel request recieved');
+  as.jobHasBeenCancelled = true;
+  event.reply('cancelled');
+});
 // Below returns empty objects
 ipcMain.on(
   'download-checked-images',
@@ -115,15 +121,15 @@ ipcMain.on(
       );
       try {
         console.log('about to download');
-        await as.get_all_images_from_dict(
+        const result: boolean = await as.get_all_images_from_dict(
           job.filePath,
           displayDateImagesRecord,
         );
 
-        event.reply('task-finished-class', true);
-        event.reply('task-finished', true);
+        // event.reply('task-finished-class', true);
+        event.reply('task-finished', result);
       } catch (error) {
-        event.reply('task-finished-class', false);
+        // event.reply('task-finished-class', false);
         event.reply('task-finished', false);
       }
     }

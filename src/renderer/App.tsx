@@ -30,7 +30,7 @@ export default function App() {
 
   useEffect(() => {
     // window.electron.ipcRenderer.sendMessage('get-images');
-    window.electron.ipcRenderer.on('recieved-images', (arg) => {
+    const recievedImagesListener = window.electron.ipcRenderer.on('recieved-images', (arg) => {
       // eslint-disable-next-line no-console
       if (arg) {
         if (typeof arg === 'object' && arg !== null) {
@@ -56,9 +56,7 @@ export default function App() {
       }
     });
     return (() => {
-      window.electron.ipcRenderer.removeEventListener('get-images');
-      window.electron.ipcRenderer.removeEventListener('recieved-images');
-      window.electron.ipcRenderer.removeEventListener('task-finished-class');
+      window.electron.ipcRenderer.removeEventListener('recieved-images', recievedImagesListener);
       // window.electron.ipcRenderer.removeEventListener('recieved-images');
     });
   }, [downloadManager]);

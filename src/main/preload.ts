@@ -4,6 +4,8 @@ import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 // import * as Electron from 'electron';
 export type Channels =
   | 'length-likely-changed'
+  | 'cancel-all-jobs'
+  | 'cancelled'
   | 'get-images'
   | 'recieved-images'
   | 'recieved-images-failed'
@@ -29,6 +31,7 @@ const electronHandler = {
     },
     on(channel: Channels, func: (...args: unknown[]) => void) {
       const subscription = (_event: IpcRendererEvent, ...args: unknown[]) => func(...args);
+      console.log(channel);
       ipcRenderer.on(channel, subscription);
       const eventNames = ipcRenderer.eventNames();
       console.log('Event Listeners:');
@@ -49,8 +52,8 @@ const electronHandler = {
         console.log(eventName, listeners);
       });
     },
-    removeEventListener(channel: Channels) {
-      ipcRenderer.removeAllListeners(channel);
+    removeEventListener(channel: Channels, listener: (...args: any[]) => void) {
+      ipcRenderer.removeListener(channel, listener);
       const eventNames = ipcRenderer.eventNames();
       console.log('Event Listeners:');
       eventNames.forEach((eventName) => {

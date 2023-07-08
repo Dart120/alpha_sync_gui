@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 function LivenessChecker() {
   const [status, setStatus] = useState(false);
   useEffect(() => {
-    window.electron.ipcRenderer.on('recieved-liveness', (arg) => {
+    const recievedLivenessListener = window.electron.ipcRenderer.on('recieved-liveness', (arg) => {
       // eslint-disable-next-line no-console
       console.log(`recieved ${arg}`);
       setStatus(arg as boolean);
@@ -16,7 +16,7 @@ function LivenessChecker() {
     }, 5000);
 
     return () => {
-      window.electron.ipcRenderer.removeEventListener('recieved-liveness');
+      window.electron.ipcRenderer.removeEventListener('recieved-liveness', recievedLivenessListener);
       clearInterval(int);
     };
   }, []);

@@ -16,17 +16,17 @@ const DateAccordionView: FC<DateAccordionProps> = ({ dateImagesRecord, setImages
   const [refreshing, setRefreshing] = useState(false);
   const [refreshWasSucessful, setRefreshWasSucessful] = useState(false);
   useEffect(() => {
-    window.electron.ipcRenderer.on('refresh-started', () => {
+    const refreshStartedListener = window.electron.ipcRenderer.on('refresh-started', () => {
       setRefreshing(true);
     });
-    window.electron.ipcRenderer.on('recieved-images', (arg) => {
+    const recievedImagesListener = window.electron.ipcRenderer.on('recieved-images', (arg) => {
       setRefreshWasSucessful(arg as boolean);
       setRefreshing(false);
     });
 
     return () => {
-      window.electron.ipcRenderer.removeEventListener('refresh-started');
-      window.electron.ipcRenderer.removeEventListener('recieved-images');
+      window.electron.ipcRenderer.removeEventListener('refresh-started', refreshStartedListener);
+      window.electron.ipcRenderer.removeEventListener('recieved-images',recievedImagesListener);
     };
   }, []);
   const viewChoice = (): React.JSX.Element => {

@@ -96,7 +96,6 @@ function ResponsiveAppBar({ downloadFunction, setImages, refreshFunction }: Resp
           <LivenessChecker />
         </Stack>
         <DownloadManagerView />
-
       </Container>
     </AppBar>
   );

@@ -2,8 +2,8 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 import { useState, useEffect, useContext } from 'react';
 import DownloadManager from 'renderer/DownloadManager';
-import Stack from '@mui/material/Stack';
-import { CircularProgress } from '@mui/material';
+import { CircularProgress, Stack, Button } from '@mui/material';
+import { ExitToApp } from '@mui/icons-material';
 import Typography from '@mui/material/Typography';
 import { DownloadManagerContext } from 'renderer/App';
 import Toast from './Toast';
@@ -14,7 +14,7 @@ function DownloadManagerView() {
   const [showFinishedToast, setShowFinishedToast] = useState(false);
   const [showFailureToast, setShowFailureToast] = useState(false);
   useEffect(() => {
-    window.electron.ipcRenderer.on('task-finished', (success) => {
+    const taskFinishedListener = window.electron.ipcRenderer.on('task-finished', (success) => {
       console.log('DETECTED TASK FINISHED');
       if (success) {
         setShowFinishedToast(true);
@@ -26,17 +26,23 @@ function DownloadManagerView() {
         console.log(jobQueue.length);
       }
     });
-    window.electron.ipcRenderer.on('length-likely-changed', () => {
+    const lengthLikelyChangedListener = window.electron.ipcRenderer.on('length-likely-changed', () => {
       console.log('DETECTED Length changed');
       setLength(jobQueue.length);
-      console.log(jobQueue.length);
+    });
+    const cancelledListener = window.electron.ipcRenderer.on('cancelled', () => {
+      setLength(0);
     });
 
     return () => {
-      window.electron.ipcRenderer.removeEventListener('task-finished');
-      window.electron.ipcRenderer.removeEventListener('length-likely-changed');
+      window.electron.ipcRenderer.removeEventListener('task-finished', taskFinishedListener);
+      window.electron.ipcRenderer.removeEventListener('length-likely-changed', lengthLikelyChangedListener);
+      window.electron.ipcRenderer.removeEventListener('cancelled', cancelledListener);
     };
   }, []);
+  const handleCancel = () => {
+    window.electron.ipcRenderer.sendMessage('cancel-all-jobs');
+  };
 
   return (
     <>
@@ -49,12 +55,13 @@ function DownloadManagerView() {
         >
           <Typography>Executing Job 1/{length}</Typography>
           <CircularProgress sx={{ margin: '1em' }} />
+          <Button size="small" onClick={handleCancel} color="warning" variant="contained" startIcon={<ExitToApp />}>Cancel All</Button>
         </Stack>
       ) : (
         <p>Idle</p>
       )}
       <Toast severity="success" message="A download just finished" open={showFinishedToast} setOpen={setShowFinishedToast} />
-      <Toast severity="error" message="A download just failed" open={showFailureToast} setOpen={setShowFailureToast} />
+      <Toast severity="error" message="A download just failed/was cancelled" open={showFailureToast} setOpen={setShowFailureToast} />
     </>
   );
 }
