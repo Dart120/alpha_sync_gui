@@ -237,5 +237,3 @@ app
     });
   })
   .catch(console.log);
-// TODO instructions
-// TODO packaging icon remove electron

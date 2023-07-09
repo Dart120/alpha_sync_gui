@@ -1,12 +1,8 @@
-import { FC } from 'react';
+import { FC, useState, ChangeEvent } from 'react';
 import * as React from 'react';
 import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import Typography from '@mui/material/Typography';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { DisplayUPNPImage } from 'main/Types';
-import ImagesView from './ImagesView';
+import DateAccordionRow from './DateAccordionRow';
 
 type DateAccordionProps = {
   dateImagesRecord: Record<string, DisplayUPNPImage[]>;
@@ -22,23 +18,10 @@ const DateAccordion: FC<DateAccordionProps> = ({ dateImagesRecord, setImages }) 
     });
   };
 
-  const listItems = Object.entries(dateImagesRecord).map(([key, value]) => {
-    console.log(key);
-    return (
-      <Accordion key={key} sx={{ width: '100%' }}>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="panel1a-content"
-          id="panel1a-header"
-        >
-          <Typography>{key}</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <ImagesView images={value} setImages={setImagesFull} date={key} />
-        </AccordionDetails>
-      </Accordion>
-    );
-  });
+  const listItems = Object.entries(dateImagesRecord).map(([key, value]) => (
+    <DateAccordionRow setImages={setImagesFull} images={value} date={key} />
+
+  ));
 
   return <div>{listItems}</div>;
 };

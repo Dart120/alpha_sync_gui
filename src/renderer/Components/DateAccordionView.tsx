@@ -26,7 +26,7 @@ const DateAccordionView: FC<DateAccordionProps> = ({ dateImagesRecord, setImages
 
     return () => {
       window.electron.ipcRenderer.removeEventListener('refresh-started', refreshStartedListener);
-      window.electron.ipcRenderer.removeEventListener('recieved-images',recievedImagesListener);
+      window.electron.ipcRenderer.removeEventListener('recieved-images', recievedImagesListener);
     };
   }, []);
   const viewChoice = (): React.JSX.Element => {
@@ -36,14 +36,15 @@ const DateAccordionView: FC<DateAccordionProps> = ({ dateImagesRecord, setImages
       }
       return (<Instructions />);
     }
-    return (<CircularProgress sx={{ margin: '5em' }} />);
+    return (<CircularProgress color="warning" sx={{ margin: '5em' }} />);
   };
   return (
     <div
       style={{
         width: '100%',
         height: '100%',
-        overflow: 'scroll',
+        overflowY: 'hidden',
+        overflowX: 'hidden',
         justifyContent: 'center',
         textAlign: 'center',
       }}

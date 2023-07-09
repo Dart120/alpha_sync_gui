@@ -1,10 +1,8 @@
 import {
-  ChangeEvent, FC, useState,
+  ChangeEvent, FC, useState, Dispatch,
 } from 'react';
-import { ImageList, Typography } from '@mui/material';
+import { ImageList } from '@mui/material';
 import { DisplayUPNPImage } from 'main/Types';
-import CheckBox from '@mui/material/Checkbox';
-import Stack from '@mui/material/Stack';
 import * as React from 'react';
 import ImageView from './ImageView';
 
@@ -12,47 +10,30 @@ type ImagesViewProps = {
   images: DisplayUPNPImage[];
   setImages: (key:string, idx: number, val: boolean) => void
   date: string
+  setIsChecked: Dispatch<React.SetStateAction<boolean>>
 };
 
-const ImagesView: FC<ImagesViewProps> = ({ images, date, setImages }) => {
-  const [isChecked, setIsChecked] = useState(false);
-  const handleCheck = (event: ChangeEvent<HTMLInputElement>) => {
-    setIsChecked(event.target.checked);
-
-    images.forEach((val, idx) => {
-      setImages(date, idx, event.target.checked);
-    });
-  };
+const ImagesView: FC<ImagesViewProps> = ({
+  images, date, setImages, setIsChecked,
+}) => {
   const checkIfAllTicked = () => {
     const res = images.reduce((isAllChecked, image) => (image.checked && isAllChecked), true);
     setIsChecked(res);
   };
 
   return (
-    <>
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        spacing={2}
-      >
-        <Typography>Select All</Typography>
-        <CheckBox onChange={(event) => handleCheck(event)} checked={isChecked} />
-      </Stack>
-
-      <ImageList sx={{ width: '100%', height: 450 }} cols={3} rowHeight={164}>
-        {images.map((item, idx) => (
-          <ImageView
-            key={item['dc:title']}
-            date={date}
-            idx={idx}
-            item={item}
-            setImages={setImages}
-            checkIfAllTicked={checkIfAllTicked}
-          />
-        ))}
-      </ImageList>
-    </>
+    <ImageList sx={{ width: '100%', height: 450 }} cols={3} rowHeight={164}>
+      {images.map((item, idx) => (
+        <ImageView
+          key={item['dc:title']}
+          date={date}
+          idx={idx}
+          item={item}
+          setImages={setImages}
+          checkIfAllTicked={checkIfAllTicked}
+        />
+      ))}
+    </ImageList>
   );
 };
 
