@@ -12,7 +12,7 @@
  */
 import path from 'path';
 import {
-  app, BrowserWindow, shell, ipcMain, dialog,
+  app, BrowserWindow, shell, ipcMain, dialog
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import { installExtension, REACT_DEVELOPER_TOOLS } from 'electron-extension-installer';
