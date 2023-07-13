@@ -12,7 +12,7 @@
  */
 import path from 'path';
 import {
-  app, BrowserWindow, shell, ipcMain, dialog
+  app, BrowserWindow, shell, ipcMain, dialog, IpcMainEvent,
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import { installExtension, REACT_DEVELOPER_TOOLS } from 'electron-extension-installer';
@@ -41,21 +41,19 @@ const getImages = async (): Promise<Record<string, UPNPImage[]>> => {
     await as.discover_avaliable_services();
     await as.generate_tree();
   } catch (error) {
-    throw new Error('Error retrieving images');
+    throw new Error(`Error retrieving images because ${error}`);
   }
 
   return as.date_to_items;
 };
-
 const ssdp = async () => {
   try {
     await as.ssdp();
   } catch (error) {
-    throw new Error('SSDP failed');
+    throw new Error(`SSDP failed because: ${error}`);
   }
 };
-ipcMain.on('get-images', async (event) => {
-  // const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
+const refresh = async (event: IpcMainEvent) => {
   try {
     event.reply('refresh-started');
     const images: Record<string, UPNPImage[]> = await getImages();
@@ -63,6 +61,21 @@ ipcMain.on('get-images', async (event) => {
   } catch (error) {
     event.reply('recieved-images', false);
   }
+};
+ipcMain.on('ssdp-start', async (event) => {
+  try {
+    await ssdp();
+    event.reply('ssdp-success');
+    console.log('works');
+    await refresh(event);
+  } catch (error) {
+    event.reply('ssdp-failed');
+  }
+});
+
+ipcMain.on('get-images', async (event) => {
+  // const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
+  await refresh(event);
 });
 function isImage(item: UPNPImage | Record<string, UPNPImage[]>): item is UPNPImage {
   return (<UPNPImage>item)['dc:title'] !== undefined;
@@ -127,6 +140,7 @@ ipcMain.on(
         );
 
         // event.reply('task-finished-class', true);
+        console.log(result);
         event.reply('task-finished', result);
       } catch (error) {
         // event.reply('task-finished-class', false);

@@ -68,6 +68,9 @@ npm run package
 ## Roadmap
 
 - Download only missing images
+- Toasts appear overlapping
+- Appbar too crowded
+- Toasts for discovery
 
 
 <a href="https://www.flaticon.com/free-icons/photograph" title="photograph icons">Photograph icons created by kank - Flaticon</a>

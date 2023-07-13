@@ -1,9 +1,11 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Typography from '@mui/material/Typography';
 import { Stack, Button } from '@mui/material';
 import Container from '@mui/material/Container';
+import { SnackbarProvider, useSnackbar } from 'notistack';
+import WifiIcon from '@mui/icons-material/Wifi';
 import DownloadIcon from '@mui/icons-material/Download';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { DisplayUPNPImage } from 'main/Types';
@@ -19,6 +21,23 @@ type ResponsiveAppBarProps = {
 function ResponsiveAppBar({ downloadFunction, setImages, refreshFunction }: ResponsiveAppBarProps) {
   const [checked, setChecked] = useState(false);
   const [refreshCanBeClicked, setRefreshCanBeClicked] = useState(true);
+  const {enqueueSnackbar} = useSnackbar()
+  useEffect(() => {
+    window.electron.ipcRenderer.on('ssdp-failed', (arg) => {
+      enqueueSnackbar('Discovery Failed (Are you connected?)', { variant: 'warning' });
+    });
+    window.electron.ipcRenderer.on('ssdp-success', (arg) => {
+      enqueueSnackbar('Discovery Success, Now refresh to load your images', { variant: 'success' });
+    });
+
+    return () => {
+      second
+    }
+  }, [])
+
+  const ssdpFunction = () => {
+    window.electron.ipcRenderer.sendMessage('ssdp-start');
+  };
   const handleRefresh = () => {
     refreshFunction();
     setRefreshCanBeClicked(false);
@@ -86,6 +105,7 @@ function ResponsiveAppBar({ downloadFunction, setImages, refreshFunction }: Resp
             color="success"
           />
         </Stack>
+        <Button size="small" onClick={ssdpFunction} color="success" variant="contained" startIcon={<WifiIcon />}>Discover Camera</Button>
         <Button size="small" onClick={downloadFunction} color="success" variant="contained" startIcon={<DownloadIcon />}>Download</Button>
         <Button disabled={!refreshCanBeClicked} size="small" onClick={handleRefresh} color="success" variant="contained" startIcon={<RefreshIcon />}>Refresh/Reconnect</Button>
         <Stack

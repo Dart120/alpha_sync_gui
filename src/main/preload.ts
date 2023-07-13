@@ -16,6 +16,9 @@ export type Channels =
   | 'task-finished'
   | 'task-finished-class'
   | 'show-save-dialog'
+  | 'ssdp-success'
+  | 'ssdp-start'
+  | 'ssdp-failed'
   | 'got-file-path';
 
 const electronHandler = {

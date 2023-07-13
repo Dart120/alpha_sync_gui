@@ -4,24 +4,23 @@ import { useState, useEffect, useContext } from 'react';
 import DownloadManager from 'renderer/DownloadManager';
 import { CircularProgress, Stack, Button } from '@mui/material';
 import { ExitToApp } from '@mui/icons-material';
+import { SnackbarProvider, VariantType, useSnackbar } from 'notistack';
 import Typography from '@mui/material/Typography';
 import { DownloadManagerContext } from 'renderer/App';
-import Toast from './Toast';
 
 function DownloadManagerView() {
   const { jobQueue } = useContext<DownloadManager | null>(DownloadManagerContext);
+  const { enqueueSnackbar } = useSnackbar();
   const [length, setLength] = useState(jobQueue.length);
-  const [showFinishedToast, setShowFinishedToast] = useState(false);
-  const [showFailureToast, setShowFailureToast] = useState(false);
   useEffect(() => {
     const taskFinishedListener = window.electron.ipcRenderer.on('task-finished', (success) => {
       console.log('DETECTED TASK FINISHED');
       if (success) {
-        setShowFinishedToast(true);
+        enqueueSnackbar('A download just finished', { variant: 'success' });
         setLength((len:number) => Math.max(0, len - 1));
         console.log(jobQueue.length);
       } else {
-        setShowFailureToast(true);
+        enqueueSnackbar('A download just failed/was cancelled', { variant: 'warning' });
         setLength(0);
         console.log(jobQueue.length);
       }
@@ -60,8 +59,6 @@ function DownloadManagerView() {
       ) : (
         <p>Idle</p>
       )}
-      <Toast severity="success" message="A download just finished" open={showFinishedToast} setOpen={setShowFinishedToast} />
-      <Toast severity="error" message="A download just failed/was cancelled" open={showFailureToast} setOpen={setShowFailureToast} />
     </>
   );
 }

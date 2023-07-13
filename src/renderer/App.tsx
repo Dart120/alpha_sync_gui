@@ -3,6 +3,7 @@ import {
   useState, useEffect, createContext,
 } from 'react';
 import { UPNPImage, DisplayUPNPImage } from 'main/Types';
+import { SnackbarProvider, useSnackbar } from 'notistack';
 import DownloadManager from './DownloadManager';
 import DateAccordionView from './Components/DateAccordionView';
 import ResponsiveAppBar from './Components/Bar';
@@ -18,8 +19,7 @@ export const DownloadManagerContext = createContext<DownloadManager | null>(null
 export default function App() {
   console.log('Component rerendered');
   const [images, setImages] = useState({});
-  const [showRefreshSuccess, setShowRefreshSuccess] = useState(false);
-  const [showRefreshFail, setShowRefreshFail] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
   // const [allChecked, setAllChecked] = useState(false);
 
   let displayDateImagesRecord: Record<string, DisplayUPNPImage[]> = {};
@@ -46,13 +46,15 @@ export default function App() {
             }),
           );
           setImages(displayDateImagesRecord);
-          setShowRefreshSuccess(true);
+          enqueueSnackbar('Refreshed', { variant: 'success' });
         } else {
         // Handle the case when `arg` is not the expected type.
-          setShowRefreshFail(true);
+          console.log('fail should show');
+          enqueueSnackbar('Refresh Failed (are you connected)', { variant: 'warning' });
         }
       } else {
-        setShowRefreshFail(true);
+        console.log('fail should show');
+        enqueueSnackbar('Refresh Failed (are you connected)', { variant: 'warning' });
       }
     });
     return (() => {
@@ -88,8 +90,6 @@ export default function App() {
                   refreshFunction={refreshFunction}
                 />
                 <DateAccordionView dateImagesRecord={images} setImages={setImages} />
-                <Toast severity="success" message="Refreshed" open={showRefreshSuccess} setOpen={setShowRefreshSuccess} />
-                <Toast severity="error" message="Refresh Failed (are you connected)" open={showRefreshFail} setOpen={setShowRefreshFail} />
               </div>
             </DownloadManagerContext.Provider>
           )}
