@@ -50,10 +50,10 @@ function DownloadManagerView() {
           direction="row"
           justifyContent="space-between"
           alignItems="center"
-          spacing={2}
+          // spacing={2}
         >
           <Typography>Executing Job 1/{length}</Typography>
-          <CircularProgress sx={{ margin: '1em' }} />
+          <CircularProgress sx={{ margin: '1em' }} color="warning"/>
           <Button size="small" onClick={handleCancel} color="warning" variant="contained" startIcon={<ExitToApp />}>Cancel All</Button>
         </Stack>
       ) : (

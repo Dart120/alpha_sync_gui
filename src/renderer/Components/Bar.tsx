@@ -4,7 +4,7 @@ import AppBar from '@mui/material/AppBar';
 import Typography from '@mui/material/Typography';
 import { Stack, Button } from '@mui/material';
 import Container from '@mui/material/Container';
-import { SnackbarProvider, useSnackbar } from 'notistack';
+import { useSnackbar } from 'notistack';
 import WifiIcon from '@mui/icons-material/Wifi';
 import DownloadIcon from '@mui/icons-material/Download';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -12,6 +12,7 @@ import { DisplayUPNPImage } from 'main/Types';
 import Checkbox from '@mui/material/Checkbox';
 import DownloadManagerView from './DownloadManagerView';
 import LivenessChecker from './LivenessChecker';
+import OptionMenu from './OptionMenu';
 
 type ResponsiveAppBarProps = {
   downloadFunction: () => void; // Define the type of the prop
@@ -20,29 +21,7 @@ type ResponsiveAppBarProps = {
 };
 function ResponsiveAppBar({ downloadFunction, setImages, refreshFunction }: ResponsiveAppBarProps) {
   const [checked, setChecked] = useState(false);
-  const [refreshCanBeClicked, setRefreshCanBeClicked] = useState(true);
-  const {enqueueSnackbar} = useSnackbar()
-  useEffect(() => {
-    window.electron.ipcRenderer.on('ssdp-failed', (arg) => {
-      enqueueSnackbar('Discovery Failed (Are you connected?)', { variant: 'warning' });
-    });
-    window.electron.ipcRenderer.on('ssdp-success', (arg) => {
-      enqueueSnackbar('Discovery Success, Now refresh to load your images', { variant: 'success' });
-    });
 
-    return () => {
-      second
-    }
-  }, [])
-
-  const ssdpFunction = () => {
-    window.electron.ipcRenderer.sendMessage('ssdp-start');
-  };
-  const handleRefresh = () => {
-    refreshFunction();
-    setRefreshCanBeClicked(false);
-    setTimeout(() => setRefreshCanBeClicked(true), 5000);
-  };
   const handleCheck = (event: React.ChangeEvent<HTMLInputElement>) => {
     setChecked(event.target.checked);
     console.log('handling check');
@@ -97,23 +76,30 @@ function ResponsiveAppBar({ downloadFunction, setImages, refreshFunction }: Resp
         <Stack
           direction="row"
           alignItems="center"
+          justifyContent="space-between"
+          width="50%"
         >
-          <Typography> Select all</Typography>
+          <Stack
+          direction="row"
+          alignItems="center"
+        >
+          <Typography> Select all Images </Typography>
           <Checkbox
             onChange={(event) => handleCheck(event)}
             checked={checked}
             color="success"
           />
-        </Stack>
-        <Button size="small" onClick={ssdpFunction} color="success" variant="contained" startIcon={<WifiIcon />}>Discover Camera</Button>
-        <Button size="small" onClick={downloadFunction} color="success" variant="contained" startIcon={<DownloadIcon />}>Download</Button>
-        <Button disabled={!refreshCanBeClicked} size="small" onClick={handleRefresh} color="success" variant="contained" startIcon={<RefreshIcon />}>Refresh/Reconnect</Button>
-        <Stack
+          </Stack>
+          <OptionMenu downloadFunction={downloadFunction} refreshFunction={refreshFunction} />
+
+
+          <Stack
           direction="row"
           alignItems="center"
         >
           <Typography>Connected:</Typography>
           <LivenessChecker />
+          </Stack>
         </Stack>
         <DownloadManagerView />
       </Container>
