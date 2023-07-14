@@ -17,10 +17,7 @@ export type Channels =
   | 'task-finished-class'
   | 'show-save-dialog'
   | 'ssdp-success'
-<<<<<<< Updated upstream
   | 'ssdp-start'
-=======
->>>>>>> Stashed changes
   | 'ssdp-failed'
   | 'got-file-path';
 
