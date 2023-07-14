@@ -1,7 +1,7 @@
 
 # Alpha Sync
 
-An application to download images from Sony Alpha Cameras for ARM Mac Computers. 
+An application to download images from Sony Alpha Cameras for ARM Mac Computers.
 
 
 ## Tech Stack
@@ -24,7 +24,7 @@ Install using the latest .dmg under the releases tab.
     
 ## Demo
 
-![Demo GIF](./examples/demo.gif)
+<img src="./examples/demo.gif" width="600" />
 
 
 ## Features
@@ -68,9 +68,6 @@ npm run package
 ## Roadmap
 
 - Download only missing images
-- Toasts appear overlapping
-- Appbar too crowded
-- Toasts for discovery
 
 
 <a href="https://www.flaticon.com/free-icons/photograph" title="photograph icons">Photograph icons created by kank - Flaticon</a>
