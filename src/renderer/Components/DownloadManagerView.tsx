@@ -4,7 +4,7 @@ import { useState, useEffect, useContext } from 'react';
 import DownloadManager from 'renderer/DownloadManager';
 import { CircularProgress, Stack, Button } from '@mui/material';
 import { ExitToApp } from '@mui/icons-material';
-import { SnackbarProvider, VariantType, useSnackbar } from 'notistack';
+import { useSnackbar } from 'notistack';
 import Typography from '@mui/material/Typography';
 import { DownloadManagerContext } from 'renderer/App';
 

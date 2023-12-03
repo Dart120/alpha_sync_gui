@@ -13,7 +13,7 @@ function LivenessChecker() {
     const int = setInterval(() => {
       window.electron.ipcRenderer.sendMessage('get-liveness');
       console.log('sent');
-    }, 5000);
+    }, 500);
 
     return () => {
       window.electron.ipcRenderer.removeEventListener('recieved-liveness', recievedLivenessListener);
