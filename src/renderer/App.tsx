@@ -13,6 +13,7 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
+import DownloadManagerView from './Components/DownloadManagerView';
 
 const downloadManager = new DownloadManager();
 export const DownloadManagerContext = createContext<DownloadManager | null>(null);
@@ -47,6 +48,7 @@ export default function App() {
           );
           setImages(displayDateImagesRecord);
           enqueueSnackbar('Refreshed', { variant: 'success' });
+
         } else {
         // Handle the case when `arg` is not the expected type.
           console.log('fail should show');
@@ -61,7 +63,7 @@ export default function App() {
       window.electron.ipcRenderer.removeEventListener('recieved-images', recievedImagesListener);
       // window.electron.ipcRenderer.removeEventListener('recieved-images');
     });
-  }, [downloadManager]);
+  }, []);
 
   const downloadCheckedImages = (): void => {
     // window.electron.ipcRenderer.sendMessage();
@@ -77,6 +79,7 @@ export default function App() {
           path="/"
           element={(
             <DownloadManagerContext.Provider value={downloadManager}>
+              <SnackbarProvider Components={{DMV: DownloadManagerView}}>
               <div
                 style={{
                   display: 'flex',
@@ -91,6 +94,7 @@ export default function App() {
                 />
                 <DateAccordionView dateImagesRecord={images} setImages={setImages} />
               </div>
+              </SnackbarProvider>
             </DownloadManagerContext.Provider>
           )}
         />

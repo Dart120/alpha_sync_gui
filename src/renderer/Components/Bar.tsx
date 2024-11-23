@@ -19,8 +19,25 @@ type ResponsiveAppBarProps = {
   refreshFunction: () => void; // Define the type of the prop
   setImages: React.Dispatch<React.SetStateAction<object>>;
 };
+
+
 function ResponsiveAppBar({ downloadFunction, setImages, refreshFunction }: ResponsiveAppBarProps) {
   const [checked, setChecked] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
+
+
+  useEffect(() => {
+    // window.electron.ipcRenderer.sendMessage('get-images');
+    // TODO SHOWS THIS TOO MUCH, STYLE IS WRONG
+    const recievedImagesListener = window.electron.ipcRenderer.on('recieved-images', (arg) => {
+      console.log("TRIED TO SHOW DMV");
+    enqueueSnackbar('DMV', { variant: 'DMV', persist: true});
+    })
+    return (() => {
+      window.electron.ipcRenderer.removeEventListener('recieved-images', recievedImagesListener);
+      // window.electron.ipcRenderer.removeEventListener('recieved-images');
+    });
+  }, []);
 
   const handleCheck = (event: React.ChangeEvent<HTMLInputElement>) => {
     setChecked(event.target.checked);

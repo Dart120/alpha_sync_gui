@@ -20,6 +20,7 @@ import { AlphaSync } from 'alpha_sync';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import { EventEmitter } from 'events'
 import {
   UPNPImage, Job, ReadyJob,
 } from './Types';
@@ -35,6 +36,11 @@ class AppUpdater {
 }
 
 let mainWindow: BrowserWindow | null = null;
+
+as.emitter.on('image-downloaded', () => {
+  console.log("***********hereejfdvjsc");
+  mainWindow?.webContents.send('image-downloaded');
+});
 
 const getImages = async (): Promise<Record<string, UPNPImage[]>> => {
   try {
@@ -106,11 +112,9 @@ ipcMain.on('get-liveness', (event) => {
     });
 });
 
-ipcMain.on('cancel-all-jobs', (event) => {
-  console.info('cancel request recieved');
-  as.jobHasBeenCancelled = true;
-  event.reply('cancelled');
-});
+
+
+
 // Below returns empty objects
 ipcMain.on(
   'download-checked-images',

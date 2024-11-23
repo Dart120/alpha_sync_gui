@@ -5,14 +5,14 @@ function LivenessChecker() {
   useEffect(() => {
     const recievedLivenessListener = window.electron.ipcRenderer.on('recieved-liveness', (arg) => {
       // eslint-disable-next-line no-console
-      console.log(`recieved ${arg}`);
+      // console.log(`recieved ${arg}`);
       setStatus(arg as boolean);
     });
     window.electron.ipcRenderer.sendMessage('get-liveness');
-    console.log('sent');
+    // console.log('sent');
     const int = setInterval(() => {
       window.electron.ipcRenderer.sendMessage('get-liveness');
-      console.log('sent');
+      // console.log('sent');
     }, 500);
 
     return () => {
